@@ -8,8 +8,13 @@ export default function NormalFetch() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [currentCard, setCurrentCard] = useState("");
 
   const [isError, setIsError] = useState(false);
+
+  const [name, setName] = useState("");
+
+  const [isUpdating, setisUpdating] = useState(false);
 
   useEffect(() => {
     setIsLoading(true);
@@ -51,20 +56,44 @@ export default function NormalFetch() {
     return response.json();
   }
 
+  async function putData(url = "", body = {}) {
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+    return response.json();
+  }
+
   async function addCard(body) {
     await postData("http://localhost:8000/api/cards", body);
-
-// si es exitosa, guarde como último la nueva carta, además de mostrar el loading, error, 
-
-
-
-
   }
-// tarea 
-// 1. Terminar el addCard
-// 2. Botón -> Input y guarde lo que ingrese
 
+  function updateCard(card) {
+    setCurrentCard(card), setisUpdating(true);
 
+    setName(card.name);
+  }
+
+  async function fetchUpdateCard() {
+    let body = {
+      _id: currentCard._id,
+      name: name,
+    };
+
+    let url = "http://localhost:8000/api/cards/" + currentCard._id;
+    try {
+      await putData(url, body);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    console.log(currentCard);
+  }, [currentCard]);
 
   return (
     <>
@@ -75,24 +104,40 @@ export default function NormalFetch() {
       >
         Envíame al Index{" "}
       </button>
-
       {isLoading && <p> Loading...</p>}
       {isError && <p> ERROR!</p>}
+      {isSuccess &&
+        data.map((card) => (
+          <div key={card._id}>
+            <p> {card.name} </p>
 
-      {isSuccess && data.map((card) => <p key={card._id}> {card.name} </p>)}
-
+            <button className="text-red-500" onClick={() => updateCard(card)}>
+              {" "}
+              update {card.name}{" "}
+            </button>
+          </div>
+        ))}
       {data === null && <p> Sin data aun</p>}
-<input         className="p-7 border border-indigo-300"
- type='text' />
-      <button
-        onClick={() =>
-          addCard({
-            name: "carta 878",
-          })
-        }
-      >
-        ADD SOME CARD
-      </button>
+      Enter a card name
+      <input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        className="p-7 border border-indigo-300"
+        type="text"
+      />
+      {isUpdating ? (
+        <button onClick={fetchUpdateCard} >UPDATING CARD</button>
+      ) : (
+        <button
+          onClick={() =>
+            addCard({
+              name: "carta 878",
+            })
+          }
+        >
+          ADD SOME CARD
+        </button>
+      )}
     </>
   );
 }

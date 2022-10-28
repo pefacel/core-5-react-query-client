@@ -1,7 +1,9 @@
 import { useRouter } from "next/router";
-import { useMutation, useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 
 export default function FetchReactQuery() {
+  const queryClient = useQueryClient();
+
   async function getData(url = "") {
     const response = await fetch(url, {
       method: "GET",
@@ -23,17 +25,16 @@ export default function FetchReactQuery() {
     return response.json();
   }
 
-  const mutation = useMutation((body) => {
-    return postData("http://localhost:8000/api/cards", body);
+  const mutation = useMutation((body) => postData("api/cards", body), {
+    onSuccess: (data) => {
+      const oldCards = queryClient.getQueryData(["cards"]);
+      queryClient.setQueryData(["cards"], [...oldCards, data]);
+    },
   });
-
-  console.log(mutation)
 
   const router = useRouter();
 
-  const propsReactQuery = useQuery(["cards"], () =>
-    getData("http://localhost:8000/api/cards")
-  );
+  const propsReactQuery = useQuery(["cards"], () => getData("api/cards"));
 
   const { isLoading, isError, isSuccess, data } = propsReactQuery;
   return (
@@ -54,7 +55,7 @@ export default function FetchReactQuery() {
 
       <button
         onClick={() => {
-          mutation.mutate({ name: "Card desde react query 1" });
+          mutation.mutate({ name: "Card desde react query 7" });
         }}
       >
         ADD SOME CARD
