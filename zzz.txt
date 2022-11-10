@@ -1,0 +1,4 @@
+1. Iniciar sesión en Login y si existe, enviar a otra pág Perfil en donde te muestre tu email + un botón de logout
+2. El botón de logout te debe borrar la sesión y redirigirte al login
+3. En la página de login debe haber un enlaze que te rediriga a una pág Register
+4. En el register, debe el usuario poder registrarse y enviar a Perfil
